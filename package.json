@@ -1,0 +1,17 @@
+{
+  "name": "advent-of-code",
+  "type": "module",
+  "version": "2023",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@flandredaisuki/eslint-config": "^0.1.3",
+    "eslint": "^8.55.0"
+  }
+}

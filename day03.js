@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
-const getProblemText = () => {
+const getProblemText = async () => {
   if (globalThis.document) {
     return document.body.textContent;
   }
+  const process = await import('node:process');
+  const fs = await import('node:fs/promises');
   const filename = process.argv[1].replace(/.*(day\d+)[.]js/, '$1.txt');
-  return require('node:fs').readFileSync(filename, 'utf8');
+  return fs.readFile(filename, 'utf8');
 };
 
 /** @param {string} text */
@@ -16,7 +18,7 @@ const splitLines = (text, separator = '\n') => text.split(separator)
 /** @param {number[]} arr */
 const sum = (arr) => Array.from(arr).reduce((a, b) => a + b, 0);
 
-const schematic = getProblemText();
+const schematic = await getProblemText();
 
 const lines = splitLines(schematic);
 
