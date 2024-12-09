@@ -5,8 +5,6 @@ set -e
 FILE_INPUT='day05.txt'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
-TRUE=0
-FALSE=1
 
 # pages number are in 10 ~ 99
 # do not need consider substring
@@ -21,13 +19,14 @@ is_valid_rule_in_page_seq() {
   PRR="$(cut -d '|' -f 2 <<<"${1}")" # page rule right
 
   if ! grep -q "${PRL}" <<<"${2}" || ! grep -q "${PRR}" <<<"${2}"; then
-    return "${TRUE}"
+    true
+    return
   fi
 
   if grep -q "${PRL}.*${PRR}" <<<"${2}"; then
-    return "${TRUE}"
+    true
   else
-    return "${FALSE}"
+    false
   fi
 }
 

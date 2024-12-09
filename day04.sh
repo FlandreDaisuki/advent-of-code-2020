@@ -5,8 +5,6 @@ set -e
 FILE_INPUT='day04.txt'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
-TRUE=0
-FALSE=1
 
 # ABC    ADGJ
 # DEF => BEHK
@@ -112,12 +110,13 @@ has_xmas() {
   if grep -q 'M.M' <<<"$(sed -n '1p' <<<"${1}")"; then
     if grep -q '.A.' <<<"$(sed -n '2p' <<<"${1}")"; then
       if grep -q 'S.S' <<<"$(sed -n '3p' <<<"${1}")"; then
-        return "${TRUE}"
+        true
+        return
       fi
     fi
   fi
 
-  return "${FALSE}"
+  false
 }
 
 HEIGHT="$(wc -l <<<"${MAP}")"
