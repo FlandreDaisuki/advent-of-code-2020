@@ -45,6 +45,46 @@ ANSWER1="${SUM_OF_EQUATION}"
 
 echo -e "answer1 ${YELLOW}${ANSWER1}${NC}"
 
-ANSWER2=""
+# usage: test_line2 <TARGET> <REST_FILEDS[*]> <RESULT>
+test_line2() {
+  local TARGET
+  TARGET="${1}"
+  local REST_FILEDS
+  read -r -a REST_FILEDS <<<"${2}"
+  local RESULT
+  RESULT="${3}"
+
+  REST="${REST_FILEDS[0]}"
+  if [ "${#REST_FILEDS[*]}" = '1' ]; then
+    [ "${TARGET}" = "$((RESULT + REST))" ] ||
+      [ "${TARGET}" = "$((RESULT * REST))" ] ||
+      [ "${TARGET}" = "${RESULT}${REST}" ]
+    return
+  fi
+
+  if [ "${RESULT}" -gt "${TARGET}" ]; then
+    false
+    return
+  fi
+
+  local HOR
+  HOR="${REST_FILEDS[0]}"
+  test_line2 "${TARGET}" "${REST_FILEDS[*]:1}" "$((RESULT + HOR))" ||
+    test_line2 "${TARGET}" "${REST_FILEDS[*]:1}" "$((RESULT * HOR))" ||
+    test_line2 "${TARGET}" "${REST_FILEDS[*]:1}" "${RESULT}${HOR}"
+}
+
+SUM_OF_EQUATION=0
+while read -r LINE; do
+  read -r -a TOK_LIST <<<"${LINE}"
+  TARGET="${TOK_LIST[0]//:/}"
+
+  # TODO: parallelize
+  if test_line2 "${TARGET}" "${TOK_LIST[*]:2}" "${TOK_LIST[1]}"; then
+    SUM_OF_EQUATION="$((SUM_OF_EQUATION + TARGET))"
+  fi
+done <"${FILE_INPUT}"
+
+ANSWER2="${SUM_OF_EQUATION}"
 
 echo -e "answer2 ${YELLOW}${ANSWER2}${NC}"
