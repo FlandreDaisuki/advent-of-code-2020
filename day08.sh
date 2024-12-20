@@ -82,6 +82,81 @@ ANSWER1="$(wc -l <<<"${VALID_ANTINODES}")"
 
 echo -e "answer1 ${YELLOW}${ANSWER1}${NC}"
 
-ANSWER2=""
+# usage: find_expand_antinodes <PA> <PB>
+# P{A,B,J,K} := `X,Y`
+# PJ<--PA--PB-->PK
+# return:
+#   PJ PK
+find_expand_antinodes() {
+  local PA
+  PA="${1}"
+  local PB
+  PB="${2}"
+  PAX="$(cut -d ',' -f 1 <<<"${PA}")"
+  PAY="$(cut -d ',' -f 2 <<<"${PA}")"
+  PBX="$(cut -d ',' -f 1 <<<"${PB}")"
+  PBY="$(cut -d ',' -f 2 <<<"${PB}")"
+
+  # VAB = PB - PA
+  VABX="$((PBX - PAX))"
+  VABY="$((PBY - PAY))"
+
+  local COLLECTION
+  COLLECTION=''
+
+  # collect BAJ direction
+  local T
+  T=0
+  local PJX
+  PJX="$((PAX - VABX * T))"
+  local PJY
+  PJY="$((PAY - VABY * T))"
+  while [ "${PJX}" -ge 1 ] && [ "${PJX}" -le "${WIDTH}" ] && [ "${PJY}" -ge 1 ] && [ "${PJY}" -le "${HEIGHT}" ]; do
+    COLLECTION+=" ${PJX},${PJY}"
+    T="$((T + 1))"
+    PJX="$((PAX - VABX * T))"
+    PJY="$((PAY - VABY * T))"
+  done
+
+  # collect ABK direction
+  T=0
+  local PKX
+  PKX="$((PBX + VABX * T))"
+  local PKY
+  PKY="$((PBY + VABY * T))"
+  while [ "${PKX}" -ge 1 ] && [ "${PKX}" -le "${WIDTH}" ] && [ "${PKY}" -ge 1 ] && [ "${PKY}" -le "${HEIGHT}" ]; do
+    COLLECTION+=" ${PKX},${PKY}"
+    T="$((T + 1))"
+    PKX="$((PBX + VABX * T))"
+    PKY="$((PBY + VABY * T))"
+  done
+
+  echo "${COLLECTION}"
+}
+
+EXPAND_ANTINODES=''
+for AF in "${ANTENNA_FREQ_LIST[@]}"; do
+  read -r -a SAME_AF_ANTENNA_LIST <<<"$(grep -E -o "${AF}\|[0-9,]+" <<<"${ANTENNA_LIST[*]}" | sed 's/.|//g' | tr '\n' ' ')"
+  for IDX_I in $(seq 1 "${#SAME_AF_ANTENNA_LIST[*]}"); do
+    for IDX_J in $(seq "${IDX_I}" "${#SAME_AF_ANTENNA_LIST[*]}"); do
+      if [ "${IDX_I}" != "${IDX_J}" ]; then
+
+        PA="${SAME_AF_ANTENNA_LIST[$((IDX_I - 1))]}"
+        PB="${SAME_AF_ANTENNA_LIST[$((IDX_J - 1))]}"
+        EXPAND_ANTINODES+=" $(find_expand_antinodes "${PA}" "${PB}")"
+      fi
+    done
+  done
+done
+
+VALID_EXPAND_ANTINODES="$(
+  awk '{
+    for(i = 1; i <= NF; i++) {
+      print $i
+    }
+  }' <<<"${EXPAND_ANTINODES}" | sort -u
+)"
+
+ANSWER2="$(wc -l <<<"${VALID_EXPAND_ANTINODES}")"
 
 echo -e "answer2 ${YELLOW}${ANSWER2}${NC}"
